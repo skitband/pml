@@ -81313,7 +81313,14 @@ var render = function() {
               _vm._v(" "),
               _c(
                 "b-button",
-                { attrs: { type: "submit", variant: "info", block: "" } },
+                {
+                  attrs: {
+                    type: "submit",
+                    variant: "info",
+                    block: "",
+                    disabled: _vm.pizzas.length <= 0
+                  }
+                },
                 [_vm._v("Submit")]
               )
             ],

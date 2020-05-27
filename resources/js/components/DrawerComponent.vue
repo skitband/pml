@@ -80,7 +80,7 @@
                 </b-row>
                 <hr />
                 <b-button size="sm" @click="addPizza" type="button" variant="secondary" block>Add More </b-button>
-                <b-button type="submit" variant="info" block>Submit</b-button>
+                <b-button type="submit" variant="info" block :disabled="pizzas.length <= 0">Submit</b-button>
             </b-form>
         </div>
     </b-sidebar>
