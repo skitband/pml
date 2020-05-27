@@ -22,7 +22,7 @@
           </template>
         </b-table>
     </div>
-    <div class="mt-3">
+    <div class="mt-3" v-if="this.orders.length">
       <b-pagination
         pills 
         v-model="currentPage"
@@ -73,7 +73,7 @@
     data() {
       return {
         filter: null,
-        perPage: 3,
+        perPage: 10,
         currentPage: 1,
         data_results: [],
         fields: [

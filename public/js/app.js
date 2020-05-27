@@ -1779,20 +1779,28 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['route'],
   data: function data() {
     return {
-      pizzas: [{
-        pizza_size: '',
-        pizza_crust: '',
-        pizza_type: '',
-        selected_topping_whole: [],
-        selected_topping_firsthalf: [],
-        selected_topping_secondhalf: []
-      }],
+      pizzas: [],
       csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      pizza_sizes: ['Small', 'Medium', 'Large'],
+      pizza_sizes_options: [{
+        value: 100,
+        text: 'Small'
+      }, {
+        value: 150,
+        text: 'Medium'
+      }, {
+        value: 200,
+        text: 'Large'
+      }],
       pizza_crusts: ['Hand Tossed', 'Deep Dish'],
       pizza_types: ['Hawaiian', 'Chicken Fajita', 'Pepperoni Feast', 'Custom'],
       toppings_options: [{
@@ -1832,21 +1840,41 @@ __webpack_require__.r(__webpack_exports__);
         text: 'Mozzarella',
         value: 'mozzarella'
       }],
-      show: true,
-      showToppings: false
+      show: true
     };
+  },
+  computed: {
+    totalToppings: function totalToppings() {
+      return this.pizzas.reduce(function (total, pizza) {
+        return total + Number((pizza.toppings_whole.length + pizza.toppings_firsthalf.length + pizza.toppings_secondhalf.length) * 20);
+      }, 0);
+    },
+    totalPizza: function totalPizza() {
+      return this.pizzas.reduce(function (total, pizza) {
+        return total + Number(pizza.selected_pizza_size);
+      }, 0);
+    },
+    totalAmount: function totalAmount() {
+      return this.totalToppings + this.totalPizza;
+    }
+  },
+  created: function created() {
+    this.addPizza();
   },
   methods: {
     onSubmit: function onSubmit(evt) {
       evt.preventDefault();
       var formAction = evt.target.action;
-      console.log(formAction);
     },
     addPizza: function addPizza() {
       this.pizzas.push({
-        pizza_size: '',
-        pizza_crust: '',
-        pizza_type: ''
+        selected_pizza_size: 100,
+        selected_pizza_crust: 'Hand Tossed',
+        selected_pizza_type: 'Hawaiian',
+        price: 0,
+        toppings_whole: [],
+        toppings_firsthalf: [],
+        toppings_secondhalf: []
       });
     },
     removePizza: function removePizza(index) {
@@ -1968,7 +1996,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       filter: null,
-      perPage: 3,
+      perPage: 10,
       currentPage: 1,
       data_results: [],
       fields: [{
@@ -81088,20 +81116,20 @@ var render = function() {
                     _vm._v(" "),
                     _c(
                       "b-form-group",
-                      { attrs: { label: "Size:", "label-for": "pizza_size" } },
+                      { attrs: { label: "Size:" } },
                       [
                         _c("b-form-select", {
                           attrs: {
-                            options: _vm.pizza_sizes,
+                            options: _vm.pizza_sizes_options,
                             required: "",
                             name: "pizza_size[]"
                           },
                           model: {
-                            value: pizza.pizza_size,
+                            value: pizza.selected_pizza_size,
                             callback: function($$v) {
-                              _vm.$set(pizza, "pizza_size", $$v)
+                              _vm.$set(pizza, "selected_pizza_size", $$v)
                             },
-                            expression: "pizza.pizza_size"
+                            expression: "pizza.selected_pizza_size"
                           }
                         })
                       ],
@@ -81121,11 +81149,11 @@ var render = function() {
                             required: ""
                           },
                           model: {
-                            value: pizza.pizza_crust,
+                            value: pizza.selected_pizza_crust,
                             callback: function($$v) {
-                              _vm.$set(pizza, "pizza_crust", $$v)
+                              _vm.$set(pizza, "selected_pizza_crust", $$v)
                             },
-                            expression: "pizza.pizza_crust"
+                            expression: "pizza.selected_pizza_crust"
                           }
                         })
                       ],
@@ -81141,6 +81169,13 @@ var render = function() {
                             options: _vm.pizza_types,
                             name: "pizza_type[]",
                             required: ""
+                          },
+                          model: {
+                            value: pizza.selected_pizza_type,
+                            callback: function($$v) {
+                              _vm.$set(pizza, "selected_pizza_type", $$v)
+                            },
+                            expression: "pizza.selected_pizza_type"
                           }
                         })
                       ],
@@ -81152,12 +81187,7 @@ var render = function() {
                       [
                         _c(
                           "b-form-group",
-                          {
-                            attrs: {
-                              label: "Topping Whole:",
-                              "label-for": "topping_whole"
-                            }
-                          },
+                          { attrs: { label: "Topping Whole:" } },
                           [
                             _c("b-form-checkbox-group", {
                               attrs: {
@@ -81166,11 +81196,11 @@ var render = function() {
                                 stacked: ""
                               },
                               model: {
-                                value: pizza.selected_topping_whole,
+                                value: pizza.toppings_whole,
                                 callback: function($$v) {
-                                  _vm.$set(pizza, "selected_topping_whole", $$v)
+                                  _vm.$set(pizza, "toppings_whole", $$v)
                                 },
-                                expression: "pizza.selected_topping_whole"
+                                expression: "pizza.toppings_whole"
                               }
                             })
                           ],
@@ -81179,12 +81209,7 @@ var render = function() {
                         _vm._v(" "),
                         _c(
                           "b-form-group",
-                          {
-                            attrs: {
-                              label: "Topping First-Half:",
-                              "label-for": "topping_firsthalf"
-                            }
-                          },
+                          { attrs: { label: "Topping First-Half:" } },
                           [
                             _c("b-form-checkbox-group", {
                               attrs: {
@@ -81193,15 +81218,11 @@ var render = function() {
                                 stacked: ""
                               },
                               model: {
-                                value: pizza.selected_topping_firsthalf,
+                                value: pizza.toppings_firsthalf,
                                 callback: function($$v) {
-                                  _vm.$set(
-                                    pizza,
-                                    "selected_topping_firsthalf",
-                                    $$v
-                                  )
+                                  _vm.$set(pizza, "toppings_firsthalf", $$v)
                                 },
-                                expression: "pizza.selected_topping_firsthalf"
+                                expression: "pizza.toppings_firsthalf"
                               }
                             })
                           ],
@@ -81210,12 +81231,7 @@ var render = function() {
                         _vm._v(" "),
                         _c(
                           "b-form-group",
-                          {
-                            attrs: {
-                              label: "Topping Second-Half:",
-                              "label-for": "topping_secondhalf"
-                            }
-                          },
+                          { attrs: { label: "Topping Second-Half:" } },
                           [
                             _c("b-form-checkbox-group", {
                               attrs: {
@@ -81224,15 +81240,11 @@ var render = function() {
                                 stacked: ""
                               },
                               model: {
-                                value: pizza.selected_topping_secondhalf,
+                                value: pizza.toppings_secondhalf,
                                 callback: function($$v) {
-                                  _vm.$set(
-                                    pizza,
-                                    "selected_topping_secondhalf",
-                                    $$v
-                                  )
+                                  _vm.$set(pizza, "toppings_secondhalf", $$v)
                                 },
-                                expression: "pizza.selected_topping_secondhalf"
+                                expression: "pizza.toppings_secondhalf"
                               }
                             })
                           ],
@@ -81247,6 +81259,43 @@ var render = function() {
                   1
                 )
               }),
+              _vm._v(" "),
+              _c(
+                "b-row",
+                { staticClass: "my-1" },
+                [
+                  _c("b-col", { attrs: { lg: "6", sm: "6" } }, [
+                    _c("label", { attrs: { for: "input-default" } }, [
+                      _vm._v("Total:")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "b-col",
+                    { attrs: { lg: "6", sm: "6" } },
+                    [
+                      _c("b-form-input", {
+                        attrs: {
+                          name: "totalAmount",
+                          size: "sm",
+                          readonly: ""
+                        },
+                        model: {
+                          value: this.totalAmount,
+                          callback: function($$v) {
+                            _vm.$set(this, "totalAmount", $$v)
+                          },
+                          expression: "this.totalAmount"
+                        }
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("hr"),
               _vm._v(" "),
               _c(
                 "b-button",
@@ -81437,30 +81486,32 @@ var render = function() {
         1
       ),
       _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "mt-3" },
-        [
-          _c("b-pagination", {
-            attrs: {
-              pills: "",
-              "total-rows": _vm.rows,
-              "per-page": _vm.perPage,
-              "aria-controls": "my-table",
-              align: "right",
-              size: "sm"
-            },
-            model: {
-              value: _vm.currentPage,
-              callback: function($$v) {
-                _vm.currentPage = $$v
-              },
-              expression: "currentPage"
-            }
-          })
-        ],
-        1
-      ),
+      this.orders.length
+        ? _c(
+            "div",
+            { staticClass: "mt-3" },
+            [
+              _c("b-pagination", {
+                attrs: {
+                  pills: "",
+                  "total-rows": _vm.rows,
+                  "per-page": _vm.perPage,
+                  "aria-controls": "my-table",
+                  align: "right",
+                  size: "sm"
+                },
+                model: {
+                  value: _vm.currentPage,
+                  callback: function($$v) {
+                    _vm.currentPage = $$v
+                  },
+                  expression: "currentPage"
+                }
+              })
+            ],
+            1
+          )
+        : _vm._e(),
       _vm._v(" "),
       _c(
         "b-modal",

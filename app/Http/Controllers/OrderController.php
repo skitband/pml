@@ -43,7 +43,7 @@ class OrderController extends Controller
         $pizzas = $request->pizza_size;
         $order = new Order;
 
-        $order->amount = 100;
+        $order->amount = $request->totalAmount;
         $order->save();
 
         $dataSet = [];
@@ -52,7 +52,7 @@ class OrderController extends Controller
             
             $dataSet[] = [
                 'order_id' => $order->id,
-                'pizza_size' => $request->pizza_size[$key],
+                'pizza_size' => ( $request->pizza_size[$key] == '100' ) ? 'Small' : (( $request->pizza_size[$key] == '150' ) ? 'Medium' : 'Large'),
                 'pizza_type' => $request->pizza_type[$key],
                 'pizza_crust' => $request->pizza_crust[$key],
                 'topping_whole' => ($request->filled('topping_whole')) ? implode(", ", $request->topping_whole) : '',

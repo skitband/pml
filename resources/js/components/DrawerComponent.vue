@@ -9,14 +9,13 @@
             <b-form :action="this.route" method="post">
                 <input type="hidden" name="_token" :value="csrf">
                 <div v-for="(pizza, index) in pizzas" :key="index">
-
                   <b-button size="sm" @click="removePizza(index)" type="button" variant="danger"><b-icon icon="trash"></b-icon></b-button>
                   <br />
                   <b-form-group 
-                      label="Size:" label-for="pizza_size">
+                      label="Size:">
                       <b-form-select
-                      v-model="pizza.pizza_size"
-                      :options="pizza_sizes"
+                      v-model="pizza.selected_pizza_size"
+                      :options="pizza_sizes_options"
                       required
                       name="pizza_size[]"
                       ></b-form-select>
@@ -25,7 +24,7 @@
                   <b-form-group 
                       label="Crust:" label-for="pizza_crust">
                       <b-form-select
-                      v-model="pizza.pizza_crust"
+                      v-model="pizza.selected_pizza_crust"
                       :options="pizza_crusts"
                       name="pizza_crust[]"
                       required
@@ -35,34 +34,34 @@
                   <b-form-group 
                       label="Type:" label-for="pizza_type">
                       <b-form-select
+                      v-model="pizza.selected_pizza_type"
                       :options="pizza_types"
                       name="pizza_type[]"
                       required
                       ></b-form-select>
                   </b-form-group>
-
                   <div>
-                      <b-form-group label="Topping Whole:" label-for="topping_whole">
+                      <b-form-group label="Topping Whole:">
                       <b-form-checkbox-group
-                          v-model="pizza.selected_topping_whole"
+                          v-model="pizza.toppings_whole"
                           :options="toppings_options"
                           name="topping_whole[]"
                           stacked
                       ></b-form-checkbox-group>
                       </b-form-group>
 
-                      <b-form-group label="Topping First-Half:" label-for="topping_firsthalf">
+                      <b-form-group label="Topping First-Half:">
                           <b-form-checkbox-group
-                              v-model="pizza.selected_topping_firsthalf"
+                              v-model="pizza.toppings_firsthalf"
                               :options="toppings_options"
                               name="topping_firsthalf[]"
                               stacked
                           ></b-form-checkbox-group>
                       </b-form-group>
 
-                      <b-form-group label="Topping Second-Half:" label-for="topping_secondhalf">
+                      <b-form-group label="Topping Second-Half:">
                           <b-form-checkbox-group
-                              v-model="pizza.selected_topping_secondhalf"
+                              v-model="pizza.toppings_secondhalf"
                               :options="toppings_options"
                               name="topping_secondhalf[]"
                               stacked
@@ -71,9 +70,16 @@
                   </div>
                   <hr />
                 </div>
-                
+                <b-row class="my-1">
+                  <b-col lg="6" sm="6">
+                    <label for="input-default">Total:</label>
+                  </b-col>
+                  <b-col lg="6" sm="6">
+                    <b-form-input name="totalAmount" v-model="this.totalAmount" size="sm" readonly></b-form-input>
+                  </b-col>
+                </b-row>
+                <hr />
                 <b-button size="sm" @click="addPizza" type="button" variant="secondary" block>Add More </b-button>
-
                 <b-button type="submit" variant="info" block>Submit</b-button>
             </b-form>
         </div>
@@ -85,18 +91,9 @@
     props: ['route'],
     data () {
       return {
-        pizzas: [
-          {
-            pizza_size: '',
-            pizza_crust: '',
-            pizza_type: '',
-            selected_topping_whole: [],
-            selected_topping_firsthalf: [],
-            selected_topping_secondhalf: [],
-          }
-        ],
+        pizzas: [],
         csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        pizza_sizes: ['Small', 'Medium', 'Large'],
+        pizza_sizes_options: [{ value: 100, text: 'Small' },{ value: 150, text: 'Medium' },{ value: 200, text: 'Large' }],
         pizza_crusts: ['Hand Tossed', 'Deep Dish'],
         pizza_types: ['Hawaiian', 'Chicken Fajita', 'Pepperoni Feast', 'Custom'],
         toppings_options: [
@@ -114,21 +111,43 @@
           { text: 'Mozzarella', value: 'mozzarella' },
         ],
         show: true,
-        showToppings: false,
-
       }
+    },
+    computed: {
+      totalToppings() {
+        return this.pizzas.reduce((total, pizza) => {
+          return total + Number((pizza.toppings_whole.length + pizza.toppings_firsthalf.length + pizza.toppings_secondhalf.length) * 20);
+        }, 0);
+      },
+
+      totalPizza() {
+        return this.pizzas.reduce((total, pizza) => {
+          return total + Number(pizza.selected_pizza_size);
+        }, 0);
+      },
+
+      totalAmount() {
+        return this.totalToppings + this.totalPizza;
+      }
+
+    },
+    created() {
+      this.addPizza();
     },
     methods: {
       onSubmit(evt) {
         evt.preventDefault()
         let formAction = evt.target.action;
-        console.log(formAction);
       },
       addPizza () {
         this.pizzas.push({
-            pizza_size: '',
-            pizza_crust: '',
-            pizza_type: '',
+            selected_pizza_size: 100,
+            selected_pizza_crust: 'Hand Tossed',
+            selected_pizza_type: 'Hawaiian',
+            price: 0,
+            toppings_whole: [],
+            toppings_firsthalf: [],
+            toppings_secondhalf: [],
         })
       },
       removePizza (index) {
